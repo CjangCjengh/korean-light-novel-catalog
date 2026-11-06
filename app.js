@@ -66,7 +66,22 @@ function localize(){
   syncInputs();
 }
 function syncInputs(){for(const [id,key] of Object.entries({'search':'q','author':'author','artist':'artist','volume-min':'min','volume-max':'max','year-from':'from','year-to':'to','search-scope':'scope','sort':'sort'}))$(id).value=state[key];}
-function searchable(w){return {title:[...Object.values(w.title),...w.volumes.map(v=>v.title)].join(' '),people:[...Object.values(w.authors).flat(),...w.artists].join(' '),synopsis:Object.values(w.synopsis).join(' '),isbn:w.volumes.map(v=>v.isbn).join(' ')};}
+function searchable(w){return {title:[...Object.values(w.title),...w.volumes.map(v=>v.title)].join(' '),people:[...Object.values(w.authors).flat(),...w.artists].join(' '),synopsis:[...Object.values(w.synopsis),...Object.values(w.nameReadings||{}).flat().map(r=>r.reading)].join(' '),isbn:w.volumes.map(v=>v.isbn).join(' ')};}
+function synopsisHTML(w){
+  const value=w.synopsis[lang];
+  const readings=w.nameReadings?.[lang]||[];
+  const spans=readings.map(r=>({...r,start:value.indexOf(r.text)}))
+    .filter(r=>r.text&&r.reading&&r.start>=0)
+    .sort((a,b)=>a.start-b.start||b.text.length-a.text.length);
+  let html='',end=0;
+  for(const r of spans){
+    if(r.start<end)continue;
+    html+=escapeHTML(value.slice(end,r.start));
+    html+=`<ruby>${escapeHTML(r.text)}<rp>（</rp><rt>${escapeHTML(r.reading)}</rt><rp>）</rp></ruby>`;
+    end=r.start+r.text.length;
+  }
+  return html+escapeHTML(value.slice(end));
+}
 function matches(w,skip=''){
   if(state.work && w.id!==state.work)return false;
   if(state.q){const hay=state.scope==='all'?w._search.all:w._search[state.scope];if(!state.q.trim().split(/\s+/).map(normalize).filter(Boolean).every(q=>hay.includes(q)))return false;}
@@ -100,10 +115,10 @@ function card(w){
       <div class="metadata"><span class="date">${w.first.replaceAll('-','.')} ${w.first!==w.last?'– '+w.last.replaceAll('-','.'):''}</span><span class="tag ${w.status}">${t.statuses[w.status]}</span>${w.webComplete?`<span class="tag web">${t.web}</span>`:''}</div>
       <div class="credits">${credit('author',w.authors[lang])}${credit('artist',w.artists)}</div><div class="metadata"><a href="${escapeHTML(stateURL({...initial(),imprint:[w.imprint]}))}" data-brand="${escapeHTML(w.imprint)}">${escapeHTML(imprintName(w.imprint))}</a><span>${escapeHTML(counts(w))}</span></div></div>
       <button class="bookmark" aria-pressed="${saved}" aria-label="${saved?t.unsave:t.saved}" title="${saved?t.unsave:t.saved}">${saved?'★':'☆'}</button>
-    </div><p class="snippet">${escapeHTML(w.synopsis[lang])}</p><details class="book-details"><summary>${t.open} (${w.volumes.length})</summary><div class="detail-content"></div></details>
+    </div><p class="snippet">${synopsisHTML(w)}</p><details class="book-details"><summary>${t.open} (${w.volumes.length})</summary><div class="detail-content"></div></details>
   </article>`;
 }
-function detailHTML(w){const t=text[lang];return `<p class="synopsis">${escapeHTML(w.synopsis[lang])}</p><div class="cover-grid">${w.volumes.map((v,i)=>`<figure class="volume"><button class="cover-button" data-cover="${i}" aria-label="${escapeHTML(coverAlt(w,v))}"><img src="${v.cover}" alt="${escapeHTML(coverAlt(w,v))}" loading="lazy" decoding="async" width="130" height="185"></button><figcaption><span class="volume-title" title="${escapeHTML(v.title)}">${escapeHTML(v.label?.[lang]||v.title)}</span><time>${v.date.replaceAll('-','.')}</time>${v.isbn?`<br><span>ISBN ${escapeHTML(v.isbn)}</span>`:''}<br><a href="${escapeHTML(v.url)}" target="_blank" rel="noopener noreferrer">${t.bookstore}</a></figcaption></figure>`).join('')}</div><div class="sources"><span>${t.source}</span>${w.sources.map(s=>`<a href="${escapeHTML(s)}" target="_blank" rel="noopener noreferrer">${escapeHTML(new URL(s).hostname.replace(/^www\./,''))}</a>`).join('')}<button type="button" class="work-link">${t.link}</button></div>`;}
+function detailHTML(w){const t=text[lang];return `<p class="synopsis">${synopsisHTML(w)}</p><div class="cover-grid">${w.volumes.map((v,i)=>`<figure class="volume"><button class="cover-button" data-cover="${i}" aria-label="${escapeHTML(coverAlt(w,v))}"><img src="${v.cover}" alt="${escapeHTML(coverAlt(w,v))}" loading="lazy" decoding="async" width="130" height="185"></button><figcaption><span class="volume-title" title="${escapeHTML(v.title)}">${escapeHTML(v.label?.[lang]||v.title)}</span><time>${v.date.replaceAll('-','.')}</time>${v.isbn?`<br><span>ISBN ${escapeHTML(v.isbn)}</span>`:''}<br><a href="${escapeHTML(v.url)}" target="_blank" rel="noopener noreferrer">${t.bookstore}</a></figcaption></figure>`).join('')}</div><div class="sources"><span>${t.source}</span>${w.sources.map(s=>`<a href="${escapeHTML(s)}" target="_blank" rel="noopener noreferrer">${escapeHTML(new URL(s).hostname.replace(/^www\./,''))}</a>`).join('')}<button type="button" class="work-link">${t.link}</button></div>`;}
 function render(){
   const t=text[lang];const anchor=document.querySelector('.work details[open]')?.closest('.work')?.dataset.id;
   filtered=works.filter(w=>matches(w));filtered.sort((a,b)=>{switch(state.sort){case'newest':return b.first.localeCompare(a.first);case'last':return b.last.localeCompare(a.last);case'title':return a.title[lang].localeCompare(b.title[lang],lang);case'volumes':return b.mainVolumes-a.mainVolumes||a.first.localeCompare(b.first);case'shortest':return a.mainVolumes-b.mainVolumes||a.first.localeCompare(b.first);default:return a.first.localeCompare(b.first);}});
