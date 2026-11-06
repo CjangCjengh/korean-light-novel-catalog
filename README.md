@@ -1,6 +1,6 @@
 # 한국 라이트노벨 목록
 
-[목록 보기](https://cjangcjengh.github.io/korean-light-novel-catalog/) · [English](README.en.md) · [中文](README.zh.md)
+[목록 보기](https://cjangcjengh.github.io/korean-light-novel-catalog/) · [English](README.en.md) · [中文](README.zh.md) · [日本語](README.ja.md)
 
 단행본으로 출간된 한국 라이트노벨 281작품. 첫 권 출간일순으로 정리했으며, 작가·일러스트레이터·출판 브랜드·권수·소개·권별 표지와 출처를 수록했습니다.
 

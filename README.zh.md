@@ -1,6 +1,6 @@
 # 韩国轻小说书目
 
-[查看书目](https://cjangcjengh.github.io/korean-light-novel-catalog/?lang=zh) · [한국어](README.md) · [English](README.en.md)
+[查看书目](https://cjangcjengh.github.io/korean-light-novel-catalog/?lang=zh) · [한국어](README.md) · [English](README.en.md) · [日本語](README.ja.md)
 
 收录281部按卷出版的韩国轻小说，按首卷发行日排列，整理作者、插画师、出版品牌、卷数、简介、逐卷封面及来源。
 
