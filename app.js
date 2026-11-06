@@ -12,7 +12,8 @@ const koreanImprints = {
   'V+':'브이플러스','Novel Engine POP':'노블엔진 팝','Carnival Novel':'카니발 노벨',
   'Gems Novel':'젬스노벨','SOVEL':'소벨','Like Novel':'라이크노벨',
   'J Novel':'제이노블','Issue Novels':'이슈노벨즈','Archetype':'아키타입',
-  'Root Novel':'루트 노벨','It Book':'잇북','Carnival Plus':'카니발 플러스'
+  'Root Novel':'루트 노벨','It Book':'잇북','Carnival Plus':'카니발 플러스',
+  'Night Novel':'나이트노벨'
 };
 const imprintName = name => lang==='ko' ? koreanImprints[name] || name : name;
 const PAGE_SIZE = 24;
